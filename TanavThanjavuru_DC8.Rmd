@@ -1,0 +1,119 @@
+---
+title: "STAT 184 Homework Exercises" 
+subtitle: "DataComputing Chapters 8"
+author: "Tanav Thanjavuru"
+output: html_notebook
+---
+
+## Assigned Exercises
+
+- DC Chapter 8 Exercises: 8.1, 8.2, 8.3 
+
+## Front Matter
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaic)
+library(tidyverse)
+
+```
+
+
+
+## Chapter 8 Exercises
+
+### Problem 8.1
+
+1.) geom_point() - Add a layer of glyphs.
+
+2.) geom_histogram() - Add a layer of glyphs.
+
+3.) ggplot() - Construct a graphics frame.
+
+4.) scale_y_log10() - Change the scale for the frame
+
+5.) ylab() - Set an axis label.
+
+6.)facet_wrap() - Divide the frame into facets.
+
+7.) geom_segment() - Add a layer of glyphs.
+
+8.) xlim() - Set an axis label.
+
+9.) facet_grid() - Divide the frame into facets.
+
+###Problem 8.2
+A.)
+```{r}
+ggplot(CPS85) +
+ aes(x = age, colour = sex) +
+ geom_density(adjust = 1.4, fill = "#0c4c8a") +
+  xlim(0,30) +
+   ylim(0.00,0.15)+
+ scale_color_hue() +
+ theme_gray() +
+ facet_wrap(vars(married))
+
+```
+
+
+B.)
+
+```{r}
+ggplot(CPS85) +
+ aes(x = age, y = wage, colour = sex) +
+ geom_smooth(span = 0.75) +
+ scale_color_hue() +
+ theme_minimal() +
+ facet_grid(vars(married))
+```
+
+C.)
+```{r}
+ggplot(CPS85) +
+ aes(x = age, y = wage, colour = sex) +
+  ylim(0,25)+
+ geom_smooth(span = 0.75) +
+ scale_color_hue() +
+ theme_minimal() +
+ facet_wrap(vars(sector))
+```
+###8.3
+
+A.)
+```{r}
+ggplot(CPS85) +
+ aes(x = age, y = wage) +
+ geom_point(size = 1L, colour = "#000000") +
+ theme_minimal()
+```
+B.)
+
+```{r}
+ggplot(CPS85) +
+ aes(x = age, y = wage, shape = sex) +
+ geom_point(size = 1L, colour = "#000000") +
+ theme_minimal()
+```
+
+C.)
+
+```{r}
+ggplot(CPS85) +
+ aes(x = age, y = wage, shape = sex) +
+ geom_point(size = 1L, colour = "#000000") +
+ theme_minimal() +
+ facet_grid(vars(married), vars())
+```
+D.)
+
+```{r}
+ggplot(CPS85) +
+ aes(x = age, y = wage, shape = married) +
+ geom_point(size = 1L, colour = "#000000") +
+    ylim(0,30)+
+ theme_minimal()
+```

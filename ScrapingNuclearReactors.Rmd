@@ -1,0 +1,61 @@
+---
+title: " Scraping Nuclear Reactors Activity "
+output: html_notebook
+Date: 03/28/2021
+Name: Tanav Thanjavuru
+---
+
+
+
+```{r}
+library(rvest)
+library(lubridate)
+
+page <- "http://en.wikipedia.org/wiki/List_of_nuclear_reactors"
+tableList <- page %>%
+  read_html() %>%
+  html_nodes(css = "table") %>%
+  html_table(fill = TRUE)
+
+head(tableList[[22]]) 
+```
+
+One of the reasons that this data table is not tidy is because there are missing data values in some of the columns. Another reason, that it is not tidy is because some of the column names are listed again in the first case. A way that the data table is tidy each of the columns represent their own value. 
+
+
+```{r}
+Japan <- tableList[[22]]
+names(Japan)[c(3,7)] <- c("type", "grossMW")
+
+
+Japan <-
+  Japan %>%
+  filter(row_number() > 1) %>%
+  rename(name = Name, 
+         reactor = `UnitNo.`,
+         model = Reactor,
+         status = Status, 
+         netMW = `Capacity in MW`,
+         construction = `Construction start`,
+         operation = `Commercial operation`, 
+         closure = Closure)
+Japan
+
+```
+```{r}
+Japan %>%
+ filter(!(type %in% "")) %>%
+ filter(!(model %in% "")) %>%
+ filter(!(netMW %in% 
+    "")) %>%
+ filter(!(grossMW %in% "")) %>%
+ filter(!(closure %in% "")) %>%
+ ggplot() +
+ aes(x = construction, y = netMW, fill = type, colour = type) +
+ geom_tile(size = 1L) +
+ scale_fill_hue() +
+ scale_color_hue() +
+ theme_minimal() +
+ theme(legend.position = "top")
+```
+By plotting this graph I was able to observe that over time, BWR's were more prominent than HWLWR and FBR, but could range from very low to very high netMW. I also noticed that that GCR, HWLWR, and FBR are not popular at all, and BWR and PWR are more used later in time. 

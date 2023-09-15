@@ -1,0 +1,139 @@
+---
+title: "DC Excercises Chapter 13 and 16"
+output: html_notebook
+---
+
+
+13.1
+```{r}
+library(dcData)
+library(mosaic)
+library(tidyverse)
+
+BabyNames %>% 
+  group_by(sex, name) %>%
+  summarise(total = sum(count)) %>%
+  filter( rank(desc(total)) <= 5) 
+```
+
+13.2 #1
+```{r}
+top100 <-
+BabyNames %>% 
+  group_by(year) %>%
+  summarise(total = sum(count)) %>%
+  filter( rank(desc(total)) <= 100) 
+
+
+bottom100 <-
+BabyNames %>% 
+  group_by(year) %>%
+  filter(rank(desc(count)) > 100) %>%
+  summarise(total = sum(count))
+
+top100
+bottom100
+
+```
+
+```{r}
+combineddata <-
+  top100 %>%
+    inner_join(bottom100, c('year' = 'year')) %>%
+    rename(Below = total.x) %>%
+    rename(Top_100 = total.y)
+
+combineddata <-
+combineddata %>%
+  pivot_longer(cols = c(Below, Top_100), names_to = "ranking", values_to = "total") %>%
+  arrange(desc(year))
+  
+combineddata
+```
+13.2 #2
+
+```{r}
+combineddata<-
+combineddata  %>%
+  pivot_wider(names_from = ranking, values_from = total)%>%
+  mutate(fraction_top_100 = Top_100/ (Below+Top_100))
+combineddata
+```
+
+13.2 #3
+```{r}
+ggplot(combineddata) +
+ aes(x = year, y = fraction_top_100) +
+ geom_line(size = 1L, colour = "#fb6a4a") +
+ labs(x = "Year", y = "Fraction of the top 100 baby names", title = "Fraction of Top 100 baby names over time") +
+ theme_minimal()
+
+```
+#13.3
+
+
+```{r}
+very_popular <-
+BabyNames %>% 
+  group_by(year, name) %>%
+  summarise(total = sum(count)) %>%
+  filter( rank(desc(total)) <= 50) 
+very_popular
+
+```
+
+
+```{r}
+very_unpopular <-
+BabyNames %>% 
+  group_by(year, name) %>%
+  summarise(total = sum(count)) %>%
+  filter(rank(desc(total)) > 1000)
+very_unpopular
+```
+
+#16.1
+
+1a.) mdy()
+1b.) 
+```{r}
+lubridate::ymd("2001-06-05") - 
+lubridate::mdy("April 30, 1777")
+```
+2a.) mdy()
+2b.)
+```{r}
+lubridate::ymd("2001-06-05") - 
+lubridate::mdy("06-23-1912")
+```
+
+3a.)dmy()
+3b.)
+```{r}
+lubridate::ymd("2001-06-05") - 
+lubridate::dmy("3 March 1847")
+```
+
+4a.) mdy_hm()
+4b.)
+```{r}
+lubridate::ymd_hm("2001-06-05 04:00") - 
+lubridate::mdy_hm("Nov. 11th, 1918 at 11:00 am")
+```
+5a.)mdy()
+5b.)
+```{r}
+lubridate::ymd("2001-06-05") -
+lubridate::mdy("July 20, 1969")
+```
+##16.2.)
+
+1.) "42,659.30" - parse_number() 
+2.) "17%" - parse_number() 
+3.) "Nineteen" - Neither
+4.) "£100" - parse_number()
+5.) "9.8 m/seconds-square" - parse_number()
+6.) "9.8 m/s^2" -  parse_number()
+7.) "6.62606957 × 10^-34 m2 kg / s" - Neither
+8.) "6.62606957e-34" - Both
+9.) "42.659,30" (A European style) - parse_number()

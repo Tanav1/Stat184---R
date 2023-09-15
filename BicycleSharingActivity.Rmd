@@ -1,0 +1,297 @@
+---
+title: "Tanav_BicycleSharingActivity"
+author: " Tanav Thanjavuru"
+date: "3/15/2021"
+output: 
+    html_notebook:
+    fig_height: 6
+    fig_width: 10
+---
+
+
+# Set Up
+
+### Clean up environment and load packages
+```{r}
+# clean up the RStudio environment 
+rm(list = ls())
+
+# load all packages here: `mosaic`, `tidyverse`, `lubridate`, and all others used
+library(mosaic)
+library(tidyverse)
+library(lubridate)
+
+
+```
+
+### Data Intake
+
+Finish the code chunk below to load the data for you.  It is mostly complete, but you need to read the CSV of the `Stations` data into R as shown in the book.  
+
+```{r}
+### Load the station data set into our RStudio environment as described in the text
+station_url <- "https://mdbeckman.github.io/dcSupplement/data/DC-Stations.csv"
+Stations <- readr::read_csv(station_url)
+
+
+
+### Load the station data set into our RStudio environment as described in the text
+
+trip_url <- "https://mdbeckman.github.io/dcSupplement/data/Trips-History-Data-2014-Q4-Small.rds"  # small data: 10k rows 
+# trip_url <- "https://mdbeckman.github.io/dcSupplement/data/Trips-History-Data-2014-Q4.rds"      # full data: 600k rows
+
+Trips <- readRDS(gzcon(url(trip_url)))
+
+
+### Backup code if you need to download the .rds file from the web and load a local version
+
+# Trips <- readRDS("2014-Q4-Trips-History-Data-Small.rds")   # small data: 10k rows
+# Trips <- readRDS("2014-Q4-Trips-History-Data.rds")         # full data: 600k rows
+
+```
+
+
+
+### Always inspect the data tables when you load them
+```{r}
+
+head(Stations)
+glimpse(Stations)
+
+```
+```{r}
+head(Trips)
+glimpse(Trips)
+```
+
+
+
+
+### Plot check-out times. (reproduce Figure 18.1: Use of shared bicycles over the three months in Q4.)
+```{r}
+Trips %>%
+  ggplot(aes(x = sdate)) +
+  geom_density(fill = "gray", color = NA)
+```
+
+
+
+
+# Section: How Long?
+
+Make box & whisker plot showing the distribution of rental duration by client type.  As instructed in the text, make sure you either configure your scale or use a filter to suppress outliers from dictating the axis range.
+```{r}
+durationhour <-
+  Trips %>%
+  mutate(durationhour = as.numeric(edate - sdate)/60)
+
+
+```
+
+```{r}
+ggplot(durationhour) +
+ aes(x = client, y = durationhour) +
+ geom_boxplot(fill = "#0c4c8a") +
+  ylim(0,60) +
+ theme_minimal()
+```
+
+
+# Section: When are bikes used?
+
+Note: You'll use several functions that begin with `lubridate::` this means that those functions have come from the `lubridate` R package, which makes it easy to work with dates in R.  The activity template instructed you to load this package already, but you should use Google or the RStudio help to get a sense of the kind of things this package is designed to do.
+
+
+##### Day of the year (1 to 365)
+```{r}
+day <-
+  Trips %>%
+  mutate(day = lubridate:: yday(sdate)) %>%
+  select(sdate,day)
+  head(day)
+
+```
+
+
+
+
+##### Day of the week (Sunday to Saturday)
+
+```{r}
+dayofweek <-
+  Trips %>%
+  mutate(week = lubridate:: wday(sdate)) %>%
+  select(sdate,week)
+  head(dayofweek)
+
+
+```
+
+
+##### Hour of the day (0 to 24)
+```{r}
+hourofday <-
+  Trips %>%
+  mutate(hour = lubridate:: hour(sdate)) %>%
+  select(sdate,hour)
+  head(hourofday)
+
+```
+
+
+
+
+##### Minute in the hour (0 to 60)
+```{r}
+minutesinhour <-
+  Trips %>%
+  mutate(minutes = lubridate:: minute(sdate)) %>%
+  select(sdate,minutes)
+  head(minutesinhour)
+
+```
+
+
+
+
+
+### Group the bike rentals by hour, weekday, & client type
+```{r}
+hwc <-
+  Trips %>%
+  mutate(hour = lubridate:: hour(sdate)) %>%
+  mutate(week = lubridate:: wday(sdate)) %>%
+  group_by(hour, week, client)
+  head(hwc)
+
+```
+
+
+
+
+### Construct a similar plot using density rather than frequency
+```{r}
+ggplot(day) +
+ aes(x = day) +
+ geom_density(adjust = 1L, fill = "#000000") +
+ theme_minimal()
+```
+```{r}
+ggplot(dayofweek) +
+ aes(x = week) +
+ geom_density(adjust = 1L, fill = "#000000") +
+ theme_minimal()
+```
+```{r}
+ggplot(hourofday) +
+ aes(x = hour) +
+ geom_density(adjust = 1L, fill = "#000000") +
+ theme_minimal()
+```
+```{r}
+ggplot(minutesinhour) +
+ aes(x = minutes) +
+ geom_density(adjust = 1L, fill = "#000000") +
+ theme_minimal()
+```
+
+
+
+
+# Section: How Far?
+
+We want to calculate the distance between stations using the `haversine()` function.  The `source()` function actually runs an R script found at the provided location.  Use a web browser to visit this URL and read about the function (it's only a few lines).
+
+```{r}
+source("https://mdbeckman.github.io/dcSupplement/R/haversine.R")
+```
+
+```{r}
+Simple <-
+  Stations %>%
+  select(name, lat, long) %>%
+  rename(sstation = name)
+
+Simple2 <-
+  Simple %>%
+  rename(estation = sstation, lat2 = lat, long2 = long)
+
+merge(head(Simple, 4), head(Simple2, 3), by = NULL)
+```
+
+
+```{r}
+StationPairs <- merge(Simple, Simple2, by = NULL)
+```
+
+
+```{r}
+PairDistances <-
+  StationPairs %>%
+  mutate(distance = haversine(lat, long, lat2, long2)) %>%
+  select(sstation, estation, distance)
+
+```
+
+```{r}
+ggplot(PairDistances) +
+ aes(x = distance) +
+ geom_density(adjust = 1L, fill = "#fcbba1") +
+ theme_minimal() +
+ xlim(0L, 15L) +
+  ylim(0,0.4)
+```
+
+
+
+```{r}
+TripDistance <- 
+  Trips %>%
+  inner_join(PairDistances, by = c("sstation" = "sstation", "estation" = "estation")) %>%
+  select(sstation, estation, distance)
+```
+
+```{r}
+ggplot(TripDistance) +
+ aes(x = distance) +
+ geom_density(adjust = 1L, color = "blue") +
+ theme_bw()
+```
+
+```{r}
+TripDistance %>%
+  ggplot() +
+ aes(x = distance) +
+ geom_density(aes(x = distance), color = "blue") +
+ geom_density(data = PairDistances, aes(x = distance), color = NA, fill = "red", alpha = 0.2) +
+  theme_bw() +
+  xlim(0L, 15L)
+```
+
+
+
+# Section: Mapping the Stations
+```{r}
+library(leaflet)
+stationMap <-
+  leaflet(Stations) %>%           # like ggplot()
+  addTiles() %>%                  # add the map
+  addCircleMarkers(radius = 2, color = "red") %>%
+  addCircleMarkers(radius = ~ mid, color = "blue", opacity = 0.0001) %>%
+  setView(-77.04, 38.9, zoom = 12)
+stationMap
+```
+
+
+
+
+
+
+# Section: Long-distance stations (Extra Credit)
+
+
+
+
+
+
+

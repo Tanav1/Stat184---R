@@ -1,0 +1,89 @@
+---
+name: Tanav Thanjavuru
+title: "DC Excercises Chapter 17 "
+output: html_notebook
+---
+
+
+#Assigned Numbers
+
+- DC Chapter 17 Exercises: 17.1, 17.3, 17.4, 17.5, 17.7 
+
+
+```{r}
+rm(list = ls())
+
+library(mosaic)
+library(tidyverse)
+library(dcData)
+library(esquisse)
+```
+
+#17.1
+```{r}
+BabyNames %>%
+  group_by(name, sex) %>%
+  summarise(total = sum(count)) %>%
+  filter(grepl("[aeiou]$", name, ignore.case = TRUE), sex == "M") %>%
+  arrange(desc(total)) %>%
+  head(3)
+```
+
+```{r}
+BabyNames %>%
+  filter(str_detect(string = name, pattern = "/s"))
+```
+```{r}
+BabyNames %>%
+  filter(grepl("joe$", name, ignore.case = TRUE))
+```
+#17.3
+A character string that this number could represent could possibly be an account number, phone number, or social security number based on how the number is laid out.   
+
+#17.4
+1.) The strings will be 2 characters long
+
+2.) 50 strings will match the pattern
+
+3.) The string most likely matches the names of the states 
+
+#17.5
+```{r}
+BibleNames <- 
+  readr::read_csv("https://mdbeckman.github.io/dcSupplement/data/BibleNames.csv")
+
+```
+```{r}
+BibleNames %>%
+  filter(grepl("bar", name, ignore.case = TRUE))
+```
+```{r}
+BibleNames %>%
+  filter(grepl("dam", name, ignore.case = TRUE))
+```
+```{r}
+BibleNames %>%
+  filter(grepl("lory", name, ignore.case = TRUE))
+```
+```{r}
+
+BibleNames %>%
+  filter(grepl("bar$", name, ignore.case = TRUE))
+```
+
+```{r}
+BibleNames %>%
+  filter(grepl("dam$", name, ignore.case = TRUE))
+```
+#17.7
+
+```{r}
+BabyNames %>%
+  filter(name %in% BibleNames$name) %>%
+  group_by(name) %>%
+  summarise(total = sum(count)) %>%
+  ungroup() %>%
+  arrange(desc(total)) %>%
+  head(10)
+  
+```

@@ -1,0 +1,130 @@
+---
+title: "STAT 184 Homework Exercises" 
+subtitle: "DataComputing Chapters 12"
+author: "Tanav Thanjavuru"
+output: html_notebook
+---
+
+## Assigned Exercises
+
+- DC Chapter 12 Exercises: 12.1-12.4 
+
+## Front Matter
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaic)
+library(tidyverse)
+library(dcData)
+
+```
+
+#12.1 #1
+```{r}
+BothSexes <-
+  BabyNames %>%
+  pivot_wider(names_from = sex , values_from = count) %>%
+  filter(M > 5 | F > 5)
+
+```
+The answer is sex
+
+#12.1 #2
+```{r}
+BothSexes %>%
+  mutate(balance = abs(log(F/M))) %>%
+  arrange(balance) %>%
+  filter(balance != 0) %>%
+  head(10)
+
+```
+
+#12.1 #3
+
+```{r}
+BothSexes %>%
+  mutate(balance = abs(log(F / M))) %>%
+  arrange(balance) %>%
+  filter(balance != 0, F > 100 | M > 100 ) %>%
+  head(10)
+```
+
+#12.1 #4
+```{r}
+BothSexes %>%
+  mutate(balance = abs(log(F / M))) %>%
+  arrange(balance) %>%
+  filter(balance != 0, F > 100 | M > 100, 2021 - year >= 20) %>%
+  head(10)
+```
+
+#12.1 #5 
+
+```{r}
+UpdatedBothSexes <-
+BothSexes %>%
+  mutate(genderratio = pmax(M / F, F / M)) %>%
+  arrange(desc(genderratio)) %>%
+  head(30)
+
+UpdatedBothSexes
+```
+
+Plot
+```{r}
+ggplot(UpdatedBothSexes) +
+ aes(x = year, y = genderratio, colour = name) +
+ geom_point(size = 1L) +
+ scale_color_hue() +
+ theme_minimal()
+```
+
+#12.2 #1
+
+-Version 1 - Each case in this table shows how popular a name was in each year as well as each case is sorted by the gender the name is associated with
+
+-Version 2 - Each case in this table shows each name per each year and how many people there are in each gender with that name. Each case is sorted by the year 1912 and 2012
+
+-Version 3 - Each case in this table shows a name, the gender that name is associated with, and how popular that name was for that gender in the years 1912 and 2012.
+
+#12.2 #2
+
+In order to get Version 1 to version 2, they used a transformation function on the sex variable to change the table to make a column for bet M and F instead of just a sex column.Version 2 is wider than version 1 because instead of sex being one column, it is broken into M/F in version 2.
+
+#12.2 #3
+In order to get Version 1 from version 3, they combined the year columns 1912 and 2012 using a transformation function into one column called year, and then they used the n function to create a new column to distinguish the count for each gender. Version 3 is wider than version 1 because the year column is split up into 1912 and 2012.
+
+#12.2 #4
+It would be better to use version 2 compared to version 3 because in version 2 you can automatically divide the columns since they are split into M and F where as in version 3 you would have to split up the variables.
+
+
+#12.2 #5
+If you had version 1, you should first change it to version 2 so that the sex has their own column for each gender instead of the being grouped in one, causing you to later split them.
+
+#12.3 #1
+
+-Table A is wider than table C because in table C, all of the countries are listed out under one column, while in table A, countries have their own columns
+
+-Table B is wider than table C because in table B the years are put in columns while in table C there is one row with all of the years
+
+-Table A is wider than table B because there are more columns compared to table B.
+
+#12.3 #2
+
+The table format that would make it easier to find the difference between 2000 and 2001 is table B because and the easiest way to do this would be to do mutate(difference = abs(Y2000-Y2001)) in the code. This will give you the positive value difference between the two years.
+
+#12.3 #3
+
+The table format that would be easier would be Table B. You could first group each country by continent, and then use a mutate function to create a new value that combines the years wanted and gives you the sum
+
+
+#12.4 #1
+
+The the resulting data frame would be less practical for useful purposes because it would combine the before and after columns into a single column called when which would make it harder to find ratios and calculations between the two values
+
+#12.4 #2 
+
+You could use a transformation function to make a column for each subject and convert the before and after columns into a single column where the value shown is the absolute value of the difference.

@@ -1,0 +1,68 @@
+---
+title: "DC Excercises: 15"
+Name: "Tanav Thanjavuru"
+Date: "4/5/2021"
+output: html_notebook
+---
+
+```{r}
+rm(list = ls())
+library(mosaic)
+library(tidyverse)
+library(ggplot2)
+library(esquisse)
+library(tidyr)
+```
+
+#15.1
+```{r}
+ggplot(CPS85) +
+ aes(x = sex, y = wage, fill = sex) +
+ geom_boxplot() +
+ scale_fill_hue() +
+ theme_minimal()
+```
+
+
+#15.2
+1.) The most likely height among NCHS people is about 1.62 meters because it has the highest density compared to the other heights.
+
+2.) Based off of the graph, I would estimate that the a woman would most likely be about 1.6 meters, and for a man, would be about 1.73 meters.
+
+3.) The BMI of a 40 year old man based off of the countour map would be about 27, and for a man the age of 70, it would be about 28-30.
+
+#15.3
+
+```{r}
+ggplot(CPS85) +
+ aes(x = educ, y = wage, colour = sex) +
+ stat_smooth(method = lm) +
+ geom_point(size = 0.7) +
+ scale_color_hue() +
+ theme_minimal() +
+ ylim(0L, 15L)
+```
+#15.4
+
+```{r}
+ggplot(Galton) +
+ aes(x = height, y = mother) +
+ geom_density_2d() +
+ theme_gray() +
+ facet_wrap(vars(sex)) +
+ xlim(57L, 75L)
+```
+#15.5
+
+1.) The data indicates that that ZIP codes with high elderly populations do not tend to have high child populations.
+
+2.) There is a relationship, although it may be weak, because a lot of the dots are around the grey area and regression line.
+
+More data
+
+1.) The flat line is consistent with the data, but there is a weak relationship. There are also a few outliers that are not accounted for by the line.
+
+2.) Based off of the graph for when there are 20 zip codes, the height where the band first starts ranges from 19-27 which is a height of about 8. For the graph where there are 80 zip codes, the height ranges from about 20-24 which is a height of 4. The ratio would be 8:4 which is about 2.
+
+3.)  Based off of the formula in 3, 1/sqrt(80) is .11 while 1/sqrt(20) is about .22. This would make the ratio about 2 to 1 which corresponds with the answer from #2.
+

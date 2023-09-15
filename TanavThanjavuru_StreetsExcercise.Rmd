@@ -1,0 +1,188 @@
+---
+name: Tanav Thanjavuru
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(dcData)
+library(mosaic)
+```
+
+
+```{r}
+download.file(url="https://mdbeckman.github.io/dcSupplement/data/CMS_ProvidersSimple.rds",
+              destfile = "CMS_providers.rds")
+DataTable <- readRDS("CMS_providers.rds")
+```
+
+```{r}
+Addresses <- read_csv("https://mdbeckman.github.io/dcSupplement/data/street-addresses.csv")
+Sample <- 
+  Addresses %>%
+  sample_n(size = 50)
+
+```
+```{r}
+View(Addresses)
+```
+```{r}
+View(DataTable)
+```
+
+#Combining data tables
+
+```{r}
+combined_addresses <-
+  DataTable%>%
+  inner_join(Addresses)
+
+count(combined_addresses)
+```
+#Solved Example
+
+
+```{r}
+Sample <- 
+  Addresses %>%
+  sample_n(size = 50)
+head(Sample)
+```
+#3.)
+```{r}
+Matches <- 
+  Sample %>%
+  filter(grepl(pattern = "PO", address))
+head(Matches)
+```
+#4
+```{r}
+Dont <- 
+  Sample %>%
+  filter( !grepl(pattern = "PO", address))
+Dont
+```
+
+
+
+#Matches that should have been there
+
+```{r}
+View(Matches)
+```
+
+#Matches that should not have been there
+```{r}
+View(Dont)
+
+```
+
+
+
+#5.) A value that did not get caught through the filter is "P O BOX 774"  
+
+
+
+#6.)
+```{r}
+pattern <- "BOX\\s+(\\d+)"
+
+Matches <- 
+  Sample %>% 
+  filter(grepl(pattern, address))
+
+Dont <-
+  Sample %>%
+  filter( !grepl(pattern, address))
+Dont
+```
+
+
+```{r}
+BoxNumbers <- 
+  Sample %>%
+  filter(grepl(pattern, address)) %>%
+  tidyr::extract(address, into = "boxnum", regex = pattern)
+BoxNumbers
+```
+#Your Turn
+
+```{r}
+pattern <- "(ST|RD|ROAD)"
+LeftOvers <-
+  Addresses %>% 
+  filter( !grepl(pattern, address),
+          !grepl("\\sAPT|UNIT\\s[\\d]+$", address),
+          !grepl(" BOX ", address))
+head(LeftOvers)
+```
+
+
+-In the first line, the variable pattern is being assigned to (ST|RD|ROAD) which is being used for later use in the next chunk
+
+-In the next two lines, Addresses of registered voters are being referenced to pull the data out of it assigned to the variable LeftOvers
+
+-In line 4, the filter statement filters out any address that have ST, RD, or Road in it. 
+
+-In line 5, all of the addresses that have APT in it is filtered out, while the UNIT stays
+
+-In line 6, all of the addresses that have BOX in it got filtered out
+
+
+#Your Turn #2
+
+```{r}
+pattern2 <- "(CIRCLE|WAY|LN|PATH|WAY|POINT)"
+LeftOvers2 <-
+  Addresses %>% 
+  filter( !grepl(pattern2, address),
+          !grepl("\\sAPT|UNIT\\s[\\d]+$", address),
+          !grepl(" BOX ", address)
+          )
+head(LeftOvers2)
+```
+
+
+
+```{r}
+pattern3 <- "(CT|BLVD|COURT|TRAIL|AVENUE|STREET)"
+LeftOvers3 <-
+  Addresses %>% 
+  filter( !grepl(pattern2, address),
+          !grepl("\\sAPT|UNIT\\s[\\d]+$", address),
+          !grepl(" BOX ", address))
+head(LeftOvers3)
+```
+
+```{r}
+library(stringr)
+
+address_popularity <-
+  combined_addresses %>%
+  select(address) %>%
+  mutate(identifiers = word(address,-1)) %>%
+  group_by(identifiers) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+head(address_popularity)
+```
+
+```{r}
+library(esquisse)
+esquisser(address_popularity)
+```
+
+
+
+```{r}
+ggplot(address_popularity) +
+ aes(x = reorder(identifiers, -count), weight = count) +
+ geom_bar(fill = "#0c4c8a") +
+ theme_minimal()
+
+```
+
+In the plot, there are several similarities in the two graphs. For example, the count of Drive has the highest by more than double. Also, for ST and RD there are many overlaps between the two terms; those are the three highest. Some of the other terms found in common are NEUSE and STREET
